@@ -5,26 +5,139 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Checkers"
         mc:Ignorable="d"
-        Title="GameWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" HorizontalAlignment="Left">
-			<TextBlock x:Name="Capture" Height="30" Width="300" FontSize="20" Text="Placeholder"/>
-			<TextBlock x:Name="Notification" Height="30" Width="400" FontSize="18" Foreground="Gold" Text=""/>
-		</StackPanel>
-        <Grid Grid.Row="1" Width ="300" Height="300" HorizontalAlignment="Left" Margin="50 0 0 0" Background ="Gray" x:Name="TestBorder" >
-            <Grid x:Name ="gameGrid">
-               
-            </Grid>
-            <Grid x:Name="Moves">
-                
-            </Grid>
-            <Grid x:Name="Checkers">
-                
-            </Grid>
-        </Grid>
-    </Grid>
+        Title="Шашки" Height="650" Width="1000">
+	<Window.Background>
+		<SolidColorBrush Color="#3D2010"/>
+	</Window.Background>
+	<Grid Margin="16">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="180"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="180"/>
+		</Grid.ColumnDefinitions>
+
+		<!-- панель белых (левая) -->
+		<Border Grid.Column="0" Background="#5C3D1E" CornerRadius="10"
+                BorderBrush="#8B6914" BorderThickness="1"
+                Padding="12" VerticalAlignment="Center">
+			<StackPanel>
+				<Ellipse Width="44" Height="44" HorizontalAlignment="Center"
+                         Margin="0 0 0 6">
+					<Ellipse.Fill>
+						<SolidColorBrush Color="#EEEEEE"/>
+					</Ellipse.Fill>
+					<Ellipse.Stroke>
+						<SolidColorBrush Color="#999999"/>
+					</Ellipse.Stroke>
+					<Ellipse.StrokeThickness>2</Ellipse.StrokeThickness>
+				</Ellipse>
+				<TextBlock Text="Белые" FontSize="16" FontFamily="Georgia"
+                           Foreground="#FFD700" HorizontalAlignment="Center"
+                           Margin="0 0 0 12"/>
+
+				<Button x:Name="SurrenderButton1" Content="⚐ Сдаться"
+                        Click="Surrender" Height="34" Margin="0 0 0 6"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="White" BorderBrush="#555"
+                        Background="#444" Cursor="Hand"/>
+				<Button x:Name="DrawButton1" Content="⚑ Ничья"
+                        Click="RequestDraw" Height="34" Margin="0 0 0 6"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="#FFD700" BorderBrush="#8B6914"
+                        Background="#7A4A20" Cursor="Hand"/>
+				<Button x:Name="DeclineButton1" Content="✕ Отказ"
+                        Click="DeclineDraw" Height="34" Margin="0 0 0 12"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="White" BorderBrush="#8B0000"
+                        Background="#8B0000" Cursor="Hand"/>
+
+				<Border BorderBrush="#8B6914" BorderThickness="0 1 0 0" Padding="0 10 0 0">
+					<StackPanel>
+						<TextBlock Text="Съедено:" FontSize="12"
+                                   Foreground="#C8A96E" FontFamily="Georgia"
+                                   Margin="0 0 0 4"/>
+						<TextBlock x:Name="WhiteCaptured" Text="Шашек: 0"
+                                   FontSize="13" Foreground="#FFD700"
+                                   FontFamily="Georgia"/>
+					
+					</StackPanel>
+				</Border>
+			</StackPanel>
+		</Border>
+
+		<!-- центр — доска + уведомление -->
+		<Grid Grid.Column="1" Margin="16 0">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<TextBlock x:Name="Notification" Grid.Row="0"
+                       FontSize="18" FontFamily="Georgia"
+                       Foreground="Gold" HorizontalAlignment="Center"
+                       Margin="0 0 0 10" Text=""/>
+
+			<Viewbox Grid.Row="1" Stretch="Uniform">
+				<Border BorderBrush="#8B5E3C" BorderThickness="4" CornerRadius="2">
+					<Grid Width="400" Height="400" x:Name="TestBorder">
+						<Grid x:Name="gameGrid"/>
+						<Grid x:Name="Moves"/>
+						<Grid x:Name="Checkers"/>
+					</Grid>
+				</Border>
+			</Viewbox>
+		</Grid>
+
+		<!-- панель чёрных (правая) -->
+		<Border Grid.Column="2" Background="#5C3D1E" CornerRadius="10"
+                BorderBrush="#8B6914" BorderThickness="1"
+                Padding="12" VerticalAlignment="Center"
+                x:Name="BlackPanel">
+			<StackPanel>
+				<Ellipse Width="44" Height="44" HorizontalAlignment="Center"
+                         Margin="0 0 0 6">
+					<Ellipse.Fill>
+						<SolidColorBrush Color="#1A1A1A"/>
+					</Ellipse.Fill>
+					<Ellipse.Stroke>
+						<SolidColorBrush Color="#555555"/>
+					</Ellipse.Stroke>
+					<Ellipse.StrokeThickness>2</Ellipse.StrokeThickness>
+				</Ellipse>
+				<TextBlock Text="Чёрные" FontSize="16" FontFamily="Georgia"
+                           Foreground="#FFD700" HorizontalAlignment="Center"
+                           Margin="0 0 0 12"/>
+
+				<Button x:Name="SurrenderButton2" Content="⚐ Сдаться"
+                        Click="Surrender" Height="34" Margin="0 0 0 6"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="White" BorderBrush="#555"
+                        Background="#444" Cursor="Hand"/>
+				<Button x:Name="DrawButton2" Content="⚑ Ничья"
+                        Click="RequestDraw" Height="34" Margin="0 0 0 6"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="#FFD700" BorderBrush="#8B6914"
+                        Background="#7A4A20" Cursor="Hand"/>
+				<Button x:Name="DeclineButton2" Content="✕ Отказ"
+                        Click="DeclineDraw" Height="34" Margin="0 0 0 12"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="White" BorderBrush="#8B0000"
+                        Background="#8B0000" Cursor="Hand"/>
+
+				<Border BorderBrush="#8B6914" BorderThickness="0 1 0 0" Padding="0 10 0 0">
+					<StackPanel>
+						<TextBlock Text="Съедено:" FontSize="12"
+                                   Foreground="#C8A96E" FontFamily="Georgia"
+                                   Margin="0 0 0 4"/>
+						<TextBlock x:Name="BlackCaptured" Text="Шашек: 0"
+                                   FontSize="13" Foreground="#FFD700"
+                                   FontFamily="Georgia"/>
+					
+					</StackPanel>
+				</Border>
+			</StackPanel>
+		</Border>
+
+		<TextBlock x:Name="Capture" Visibility="Collapsed"/>
+	</Grid>
 </Window>

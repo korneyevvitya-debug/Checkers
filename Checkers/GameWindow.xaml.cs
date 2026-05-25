@@ -1,51 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Brushes = System.Windows.Media.Brushes;
+using Panel = System.Windows.Controls.Panel;
+using Button = System.Windows.Controls.Button;
+using Color = System.Windows.Media.Color;
+using System.IO;
 
 namespace Checkers
 {
     public partial class GameWindow : Window
     {
         private bool _vsComputer;
+        private string _savePath;
+        private bool _useXml;
+        private bool _gameEnded = false;
 
-        public GameWindow(bool vsComputer)
+        public GameWindow(bool vsComputer, string savePath, bool useXml)
         {
             InitializeComponent();
             _vsComputer = vsComputer;
+            _savePath = savePath;
+            _useXml = useXml;
             this.Closed += SaveGame!;
 
             if (vsComputer)
-                Game = new Model.Core.GameVsComputer();
+                Game = new Model.Core.GameVsComputer(true);
             else
                 Game = new Model.Core.Game();
 
-            Game.OnKingPromotion = (pos) =>
-            {
-                string color = Game.Pieces.Find(p => p.Position == pos)?.IsBlack == true ? "Чёрная" : "Белая";
-                Notification.Text = $"{color} шашка стала дамкой!";
-
-                // убираем уведомление через 3 секунды
-                var timer = new System.Windows.Threading.DispatcherTimer();
-                timer.Interval = TimeSpan.FromSeconds(3);
-                timer.Tick += (s, e) => { Notification.Text = ""; timer.Stop(); };
-                timer.Start();
-            };
-
+            SetupGameEvents();
             InitGameGrid();
             UpdateBoard();
         }
 
-        public GameWindow(string savePath)
+        public GameWindow(string savePath, bool isLoad, bool useXml)
         {
             InitializeComponent();
+            _savePath = savePath;
+            _useXml = useXml;
             this.Closed += SaveGame!;
-            // загрузка из файла — добавим позже
-            Game = new Model.Core.Game();
+
+            Model.Data.GameSerializerBase serializer = useXml
+                ? new Model.Data.GameSerializerXml()
+                : new Model.Data.GameSerializer();
+
+            var loaded = serializer.Load(savePath);
+            Game = loaded ?? new Model.Core.Game();
+            _vsComputer = Game is Model.Core.GameVsComputer;
+
+            SetupGameEvents();
             InitGameGrid();
             UpdateBoard();
+        }
+
+        private void SetupGameEvents()
+        {
+            Game.OnKingPromotion = (pos) =>
+            {
+                string color = Game.Pieces.Find(p => p.Position == pos)?.IsBlack == true ? "Чёрная" : "Белая";
+                ShowNotification($"{color} шашка стала дамкой!");
+            };
+
+            Game.OnGameOver = (blackWon) =>
+            {
+                _gameEnded = true;
+                if (blackWon == null)
+                {
+                    Notification.Text = "Ничья!";
+                    Notification.Foreground = Brushes.Gold;
+                }
+                else if (_vsComputer)
+                {
+                    if (blackWon.Value)
+                    {
+                        Notification.Text = "Компьютер победил!";
+                        Notification.Foreground = Brushes.Red;
+                    }
+                    else
+                    {
+                        Notification.Text = "Вы победили!";
+                        Notification.Foreground = Brushes.LimeGreen;
+                    }
+                }
+                else
+                {
+                    Notification.Text = blackWon.Value ? "Чёрные победили!" : "Белые победили!";
+                    Notification.Foreground = Brushes.Gold;
+                }
+
+                gameGrid.IsHitTestVisible = false;
+                DrawButton1.IsEnabled = false;
+                DrawButton2.IsEnabled = false;
+                SurrenderButton1.IsEnabled = false;
+                if (!_vsComputer)
+                {
+                    DeclineButton1.IsEnabled = false;
+                    DeclineButton2.IsEnabled = false;
+                    SurrenderButton2.IsEnabled = false;
+                }
+            };
+
+           
+
+            if (_vsComputer)
+            {
+                BlackPanel.Visibility = Visibility.Collapsed;
+                DeclineButton1.Visibility = Visibility.Collapsed;
+                DeclineButton2.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                DeclineButton1.Visibility = Visibility.Collapsed;
+                DeclineButton2.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ShowNotification(string text)
+        {
+            Notification.Text = text;
+            Notification.Foreground = Brushes.Gold;
+            var timer = new System.Windows.Threading.DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(3);
+            timer.Tick += (s, e) => { Notification.Text = ""; timer.Stop(); };
+            timer.Start();
         }
 
         private void InitGameGrid()
@@ -73,7 +155,9 @@ namespace Checkers
                     Border square = new Border()
                     {
                         Tag = (row, column),
-                        Background = (row + column) % 2 == 0 ? Brushes.White : Brushes.DimGray,
+                        Background = (row + column) % 2 == 0
+                            ? new SolidColorBrush(Color.FromRgb(240, 217, 181))
+                            : new SolidColorBrush(Color.FromRgb(181, 136, 99)),
                     };
                     square.MouseLeftButtonDown += (o, e) => TrySelect(((int, int))square.Tag);
                     Panel.SetZIndex(square, 0);
@@ -86,7 +170,7 @@ namespace Checkers
 
         private void UpdateBoard()
         {
-            Capture.Text = $"Must capture: {Game.MustCapture}";
+            Capture.Text = "";
             Checkers.Children.Clear();
 
             for (int row = 0; row < 8; row++)
@@ -102,11 +186,16 @@ namespace Checkers
                         {
                             Width = 30,
                             Height = 30,
-                            Fill = Game.Gameboard[row, column] < 0 ? Brushes.OrangeRed : Brushes.Black,
+                            Fill = Game.Gameboard[row, column] < 0
+                                ? Brushes.White
+                                : new SolidColorBrush(Color.FromRgb(30, 30, 30)),
+                            Stroke = Game.Gameboard[row, column] < 0
+                                ? new SolidColorBrush(Color.FromRgb(100, 100, 100))
+                                : new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                            StrokeThickness = 2,
                             IsHitTestVisible = false
                         };
 
-                        // дамка — обводка
                         if (isKing)
                         {
                             circle.Stroke = Brushes.Gold;
@@ -120,6 +209,20 @@ namespace Checkers
                     }
                 }
             }
+
+            UpdateCaptureCounters();
+        }
+
+        private void UpdateCaptureCounters()
+        {
+            int blackLeft = Game.Pieces.Count(p => p.IsBlack);
+            int whiteLeft = Game.Pieces.Count(p => !p.IsBlack);
+
+            WhiteCaptured.Text = $"Съедено: {12 - blackLeft}";
+            BlackCaptured.Text = $"Съедено: {12 - whiteLeft}";
+
+            if (string.IsNullOrEmpty(Notification.Text))
+                Notification.Text = Game.IsBlackTurn ? "Ход чёрных" : "Ход белых";
         }
 
         public Model.Core.Game Game { get; private set; }
@@ -131,14 +234,12 @@ namespace Checkers
             Game.AttemptAction(pos);
             ShowAvailibleMoves();
             UpdateBoard();
-            CheckWin();
 
             if (_vsComputer && ((Model.Core.GameVsComputer)Game).IsComputerTurn)
             {
                 ((Model.Core.GameVsComputer)Game).MakeComputerMove();
                 ShowAvailibleMoves();
                 UpdateBoard();
-                CheckWin();
             }
         }
 
@@ -161,26 +262,95 @@ namespace Checkers
             }
         }
 
-        private void CheckWin()
+        private void RequestDraw(object sender, EventArgs e)
         {
-            bool blackExists = Game.Pieces.Exists(p => p.IsBlack);
-            bool whiteExists = Game.Pieces.Exists(p => !p.IsBlack);
+            if (_vsComputer)
+            {
+                int computerScore = 0;
+                int playerScore = 0;
+                foreach (var piece in Game.Pieces)
+                {
+                    int points = piece is Model.Core.King ? 3 : 1;
+                    if (piece.IsBlack) computerScore += points;
+                    else playerScore += points;
+                }
 
-            if (!blackExists)
-            {
-                MessageBox.Show("Белые победили!");
-                this.Close();
+                if (computerScore < playerScore)
+                {
+                    Notification.Text = "Компьютер согласился на ничью!";
+                    Notification.Foreground = Brushes.Gold;
+                    gameGrid.IsHitTestVisible = false;
+                    DrawButton1.IsEnabled = false;
+                    SurrenderButton1.IsEnabled = false;
+                }
+                else
+                {
+                    ShowNotification("Компьютер отказался от ничьей!");
+                }
             }
-            else if (!whiteExists)
+            else
             {
-                MessageBox.Show("Чёрные победили!");
-                this.Close();
+                bool isBlack = (sender as Button)?.Name == "DrawButton2";
+                bool isDraw = Game.RequestDraw(isBlack);
+
+                if (!isDraw)
+                {
+                    string who = isBlack ? "Чёрные" : "Белые";
+                    ShowNotification($"{who} предлагают ничью!");
+                    if (isBlack)
+                        DeclineButton1.Visibility = Visibility.Visible;
+                    else
+                        DeclineButton2.Visibility = Visibility.Visible;
+                }
             }
+        }
+
+        private void DeclineDraw(object sender, EventArgs e)
+        {
+            bool isBlack = (sender as Button)?.Name == "DeclineButton2";
+            Game.DeclineDraw(isBlack);
+            ShowNotification(isBlack ? "Чёрные отказали в ничьей!" : "Белые отказали в ничьей!");
+            if (isBlack)
+                DeclineButton2.Visibility = Visibility.Collapsed;
+            else
+                DeclineButton1.Visibility = Visibility.Collapsed;
+        }
+
+        private void Surrender(object sender, EventArgs e)
+        {
+
+            bool isBlack = (sender as Button)?.Name == "SurrenderButton2";
+            Notification.Text = isBlack
+                ? "Чёрные сдались! Белые победили!"
+                : "Белые сдались! Чёрные победили!";
+            Notification.Foreground = Brushes.OrangeRed;
+            gameGrid.IsHitTestVisible = false;
+            DrawButton1.IsEnabled = false;
+            DrawButton2.IsEnabled = false;
+            SurrenderButton1.IsEnabled = false;
+            if (!_vsComputer)
+            {
+                SurrenderButton2.IsEnabled = false;
+                DeclineButton1.IsEnabled = false;
+                DeclineButton2.IsEnabled = false;
+            }
+            _gameEnded = true;
+            if (File.Exists(_savePath))
+                File.Delete(_savePath);
+
+            // удаляем сохранение чтобы нельзя было продолжить
+            if (File.Exists(_savePath))
+                File.Delete(_savePath);
         }
 
         private void SaveGame(object sender, EventArgs e)
         {
-            // сохранение добавим позже
+            if (_gameEnded) return; // не сохраняем если игра завершена
+
+            Model.Data.GameSerializerBase serializer = _useXml
+                ? new Model.Data.GameSerializerXml()
+                : new Model.Data.GameSerializer();
+            serializer.Save(Game, _savePath);
         }
     }
 }

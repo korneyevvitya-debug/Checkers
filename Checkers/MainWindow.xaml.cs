@@ -6,16 +6,98 @@ namespace Checkers
 {
     public partial class MainWindow : Window
     {
+        private string _savePath = "savegame.json";
+        private const string SavePathConfig = "savepath.txt";
+        private bool _useXml = false;
+        private bool _initialized = false; // флаг инициализации
+
         public MainWindow()
         {
             InitializeComponent();
-            // кнопка продолжить неактивна если нет сохранения
-            ContinueButton.IsEnabled = File.Exists("savegame.json");
+
+            if (File.Exists(SavePathConfig))
+            {
+                var savedPath = File.ReadAllText(SavePathConfig).Trim();
+                if (!string.IsNullOrEmpty(savedPath))
+                {
+                    _savePath = savedPath;
+                    SavePathText.Text = Path.GetDirectoryName(savedPath) ?? "(не выбрана)";
+
+                    if (savedPath.EndsWith(".xml"))
+                    {
+                        _useXml = true;
+                        FormatComboBox.SelectedIndex = 1;
+                    }
+                }
+            }
+
+            _initialized = true; // только после загрузки разрешаем FormatChanged
+            UpdateContinueButton();
+        }
+
+        private void FormatChanged(object sender, EventArgs e)
+        {
+            if (!_initialized) return; // игнорируем пока не загрузились
+
+            _useXml = FormatComboBox.SelectedIndex == 1;
+
+            if (!string.IsNullOrEmpty(_savePath))
+            {
+                string dir = Path.GetDirectoryName(_savePath) ?? "";
+                string oldPath = _savePath;
+                _savePath = Path.Combine(dir, _useXml ? "savegame.xml" : "savegame.json");
+
+                if (File.Exists(oldPath) && oldPath != _savePath)
+                {
+                    try
+                    {
+                        Model.Data.GameSerializerBase oldSerializer = oldPath.EndsWith(".xml")
+                            ? new Model.Data.GameSerializerXml()
+                            : new Model.Data.GameSerializer();
+
+                        Model.Data.GameSerializerBase newSerializer = _useXml
+                            ? new Model.Data.GameSerializerXml()
+                            : new Model.Data.GameSerializer();
+
+                        var game = oldSerializer.Load(oldPath);
+                        if (game != null)
+                            newSerializer.Save(game, _savePath);
+                    }
+                    catch { }
+                }
+
+                File.WriteAllText(SavePathConfig, _savePath);
+                UpdateContinueButton();
+            }
+        }
+
+        private void SelectSaveFolder(object sender, EventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string fileName = _useXml ? "savegame.xml" : "savegame.json";
+                _savePath = Path.Combine(dialog.SelectedPath, fileName);
+                SavePathText.Text = dialog.SelectedPath;
+                File.WriteAllText(SavePathConfig, _savePath);
+                UpdateContinueButton();
+            }
+        }
+
+        private void UpdateContinueButton()
+        {
+            Model.Data.GameSerializerBase serializer = _useXml
+                ? new Model.Data.GameSerializerXml()
+                : new Model.Data.GameSerializer();
+            bool valid = serializer.IsValidSave(_savePath);
+            ContinueButton.IsEnabled = valid;
+            if (File.Exists(_savePath) && !valid)
+                SavePathText.Text += " — файл некорректного формата!";
         }
 
         private void StartTwoPlayer(object sender, EventArgs e)
         {
-            var gameWindow = new GameWindow(false);
+            var gameWindow = new GameWindow(false, _savePath, _useXml);
             gameWindow.Closed += GameWindowClosed!;
             gameWindow.Show();
             this.Hide();
@@ -23,7 +105,7 @@ namespace Checkers
 
         private void StartVsComputer(object sender, EventArgs e)
         {
-            var gameWindow = new GameWindow(true);
+            var gameWindow = new GameWindow(true, _savePath, _useXml);
             gameWindow.Closed += GameWindowClosed!;
             gameWindow.Show();
             this.Hide();
@@ -31,7 +113,7 @@ namespace Checkers
 
         private void ContinueGame(object sender, EventArgs e)
         {
-            var gameWindow = new GameWindow("savegame.json");
+            var gameWindow = new GameWindow(_savePath, true, _useXml);
             gameWindow.Closed += GameWindowClosed!;
             gameWindow.Show();
             this.Hide();
@@ -39,8 +121,7 @@ namespace Checkers
 
         private void GameWindowClosed(object sender, EventArgs e)
         {
-            // обновляем кнопку — вдруг появилось сохранение
-            ContinueButton.IsEnabled = File.Exists("savegame.json");
+            UpdateContinueButton();
             this.Show();
         }
     }
