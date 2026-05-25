@@ -211,6 +211,11 @@ namespace Checkers
             }
 
             UpdateCaptureCounters();
+            if (!_gameEnded)
+            {
+                Notification.Text = Game.IsBlackTurn ? "Ход чёрных" : "Ход белых";
+                Notification.Foreground = Brushes.Gold;
+            }
         }
 
         private void UpdateCaptureCounters()
@@ -220,9 +225,6 @@ namespace Checkers
 
             WhiteCaptured.Text = $"Съедено: {12 - blackLeft}";
             BlackCaptured.Text = $"Съедено: {12 - whiteLeft}";
-
-            if (string.IsNullOrEmpty(Notification.Text))
-                Notification.Text = Game.IsBlackTurn ? "Ход чёрных" : "Ход белых";
         }
 
         public Model.Core.Game Game { get; private set; }
