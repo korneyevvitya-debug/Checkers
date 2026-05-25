@@ -5,13 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Checkers"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Button Content="Start" Click="StartGame" Grid.Row="0" Width="200" Background="DimGray"></Button>
-    </Grid>
-    
+        Title="Шашки" Height="450" Width="800">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="100"/>
+			<RowDefinition Height="100"/>
+			<RowDefinition Height="100"/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<Button Content="Новая игра на двоих" Click="StartTwoPlayer"
+                Grid.Row="0" Width="200" Background="DimGray" Foreground="White"/>
+		<Button Content="Новая игра с компьютером" Click="StartVsComputer"
+                Grid.Row="1" Width="200" Background="DimGray" Foreground="White"/>
+		<Button Content="Продолжить игру" Click="ContinueGame"
+                Grid.Row="2" Width="200" Background="DimGray" Foreground="White"
+                x:Name="ContinueButton"/>
+	</Grid>
 </Window>
