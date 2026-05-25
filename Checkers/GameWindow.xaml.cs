@@ -345,6 +345,20 @@ namespace Checkers
                 File.Delete(_savePath);
         }
 
+        private void GoToMenu(object sender, EventArgs e)
+        {
+            // если игра не завершена — сохраняем
+            if (!_gameEnded)
+            {
+                Model.Data.GameSerializerBase serializer = _useXml
+                    ? new Model.Data.GameSerializerXml()
+                    : new Model.Data.GameSerializer();
+                serializer.Save(Game, _savePath);
+                _gameEnded = true; // чтобы SaveGame не сохранял повторно
+            }
+            this.Close();
+        }
+
         private void SaveGame(object sender, EventArgs e)
         {
             if (_gameEnded) return; // не сохраняем если игра завершена

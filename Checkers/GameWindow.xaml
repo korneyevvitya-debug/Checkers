@@ -34,7 +34,6 @@
 				<TextBlock Text="Белые" FontSize="16" FontFamily="Georgia"
                            Foreground="#FFD700" HorizontalAlignment="Center"
                            Margin="0 0 0 12"/>
-
 				<Button x:Name="SurrenderButton1" Content="⚐ Сдаться"
                         Click="Surrender" Height="34" Margin="0 0 0 6"
                         FontFamily="Georgia" FontSize="13"
@@ -50,7 +49,6 @@
                         FontFamily="Georgia" FontSize="13"
                         Foreground="White" BorderBrush="#8B0000"
                         Background="#8B0000" Cursor="Hand"/>
-
 				<Border BorderBrush="#8B6914" BorderThickness="0 1 0 0" Padding="0 10 0 0">
 					<StackPanel>
 						<TextBlock Text="Съедено:" FontSize="12"
@@ -59,7 +57,6 @@
 						<TextBlock x:Name="WhiteCaptured" Text="Шашек: 0"
                                    FontSize="13" Foreground="#FFD700"
                                    FontFamily="Georgia"/>
-					
 					</StackPanel>
 				</Border>
 			</StackPanel>
@@ -72,10 +69,18 @@
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
 
-			<TextBlock x:Name="Notification" Grid.Row="0"
-                       FontSize="18" FontFamily="Georgia"
-                       Foreground="Gold" HorizontalAlignment="Center"
-                       Margin="0 0 0 10" Text=""/>
+			<StackPanel Grid.Row="0" Orientation="Horizontal"
+                        HorizontalAlignment="Center" Margin="0 0 0 10">
+				<Button Content="← В меню" Click="GoToMenu"
+                        Height="30" Width="100" Margin="0 0 10 0"
+                        FontFamily="Georgia" FontSize="13"
+                        Foreground="#FFD700" BorderBrush="#8B6914"
+                        Background="#7A4A20" Cursor="Hand"/>
+				<TextBlock x:Name="Notification"
+                           FontSize="18" FontFamily="Georgia"
+                           Foreground="Gold" VerticalAlignment="Center"
+                           Text=""/>
+			</StackPanel>
 
 			<Viewbox Grid.Row="1" Stretch="Uniform">
 				<Border BorderBrush="#8B5E3C" BorderThickness="4" CornerRadius="2">
@@ -107,7 +112,6 @@
 				<TextBlock Text="Чёрные" FontSize="16" FontFamily="Georgia"
                            Foreground="#FFD700" HorizontalAlignment="Center"
                            Margin="0 0 0 12"/>
-
 				<Button x:Name="SurrenderButton2" Content="⚐ Сдаться"
                         Click="Surrender" Height="34" Margin="0 0 0 6"
                         FontFamily="Georgia" FontSize="13"
@@ -123,7 +127,6 @@
                         FontFamily="Georgia" FontSize="13"
                         Foreground="White" BorderBrush="#8B0000"
                         Background="#8B0000" Cursor="Hand"/>
-
 				<Border BorderBrush="#8B6914" BorderThickness="0 1 0 0" Padding="0 10 0 0">
 					<StackPanel>
 						<TextBlock Text="Съедено:" FontSize="12"
@@ -132,7 +135,6 @@
 						<TextBlock x:Name="BlackCaptured" Text="Шашек: 0"
                                    FontSize="13" Foreground="#FFD700"
                                    FontFamily="Georgia"/>
-					
 					</StackPanel>
 				</Border>
 			</StackPanel>

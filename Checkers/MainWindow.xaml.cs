@@ -9,7 +9,7 @@ namespace Checkers
         private string _savePath = "savegame.json";
         private const string SavePathConfig = "savepath.txt";
         private bool _useXml = false;
-        private bool _initialized = false; // флаг инициализации
+        private bool _initialized = false;
 
         public MainWindow()
         {
@@ -31,13 +31,13 @@ namespace Checkers
                 }
             }
 
-            _initialized = true; // только после загрузки разрешаем FormatChanged
+            _initialized = true;
             UpdateContinueButton();
         }
 
         private void FormatChanged(object sender, EventArgs e)
         {
-            if (!_initialized) return; // игнорируем пока не загрузились
+            if (!_initialized) return;
 
             _useXml = FormatComboBox.SelectedIndex == 1;
 
@@ -98,6 +98,9 @@ namespace Checkers
         private void StartTwoPlayer(object sender, EventArgs e)
         {
             var gameWindow = new GameWindow(false, _savePath, _useXml);
+            gameWindow.Width = this.Width;
+            gameWindow.Height = this.Height;
+            gameWindow.WindowState = this.WindowState;
             gameWindow.Closed += GameWindowClosed!;
             gameWindow.Show();
             this.Hide();
@@ -106,6 +109,9 @@ namespace Checkers
         private void StartVsComputer(object sender, EventArgs e)
         {
             var gameWindow = new GameWindow(true, _savePath, _useXml);
+            gameWindow.Width = this.Width;
+            gameWindow.Height = this.Height;
+            gameWindow.WindowState = this.WindowState;
             gameWindow.Closed += GameWindowClosed!;
             gameWindow.Show();
             this.Hide();
@@ -114,6 +120,9 @@ namespace Checkers
         private void ContinueGame(object sender, EventArgs e)
         {
             var gameWindow = new GameWindow(_savePath, true, _useXml);
+            gameWindow.Width = this.Width;
+            gameWindow.Height = this.Height;
+            gameWindow.WindowState = this.WindowState;
             gameWindow.Closed += GameWindowClosed!;
             gameWindow.Show();
             this.Hide();
@@ -121,6 +130,12 @@ namespace Checkers
 
         private void GameWindowClosed(object sender, EventArgs e)
         {
+            if (sender is GameWindow gw)
+            {
+                this.Width = gw.Width;
+                this.Height = gw.Height;
+                this.WindowState = gw.WindowState;
+            }
             UpdateContinueButton();
             this.Show();
         }
