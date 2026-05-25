@@ -9,21 +9,27 @@ namespace Model.Core
 		private static readonly Random _random = new Random();
 		public bool IsComputerTurn => IsBlackTurn; // компьютер играет за чёрных
 
-		public void MakeComputerMove()
-		{
-			int safety = 0; // защита от бесконечного цикла
-			while (IsComputerTurn && safety < 20)
-			{
-				var bestMove = GetBestMove(depth: 5);
-				if (bestMove == null) break;
+        public void MakeComputerMove()
+        {
+            // делаем один ход
+            var bestMove = GetBestMove(depth: 5);
+            if (bestMove == null) return;
 
-				AttemptAction(bestMove.Value.from);
-				AttemptAction(bestMove.Value.to);
-				safety++;
-			}
-		}
+            AttemptAction(bestMove.Value.from);
+            AttemptAction(bestMove.Value.to);
 
-		private ((int, int) from, (int, int) to)? GetBestMove(int depth)
+            // продолжаем только если идёт серия взятий той же фигурой
+            int safety = 0;
+            while (IsComputerTurn && MustCapture && MoveSet.Count > 0 && safety < 20)
+            {
+                var captureMove = GetBestMove(depth: 3);
+                if (captureMove == null) break;
+                AttemptAction(captureMove.Value.to);
+                safety++;
+            }
+        }
+
+        private ((int, int) from, (int, int) to)? GetBestMove(int depth)
 		{
 			var moves = GetAllMoves();
 			if (moves.Count == 0) return null;
@@ -101,5 +107,6 @@ namespace Model.Core
 			}
 			return score;
 		}
-	}
+        public GameVsComputer(bool withPieces) : base(withPieces) { }
+    }
 }

@@ -6,16 +6,21 @@ using System.Threading.Tasks;
 
 namespace Model.Core
 {
-    public class Game
+    public partial class Game
     {
         public int[,] Gameboard { get; private set; }
         public List<Piece> Pieces { get; set; }
-        public Piece Selected { get; private set; }
+        public Piece? Selected { get; private set; }
         public bool IsBlackTurn { get; set; }
         public List<(int, int)> MoveSet { get; private set; }
         public bool MustCapture { get; set; }
+        public Action<(int, int)>? OnKingPromotion { get; set; }
+        public Action<bool?>? OnGameOver { get; set; }
+        
 
-        public Game()
+        public Game() : this(true) { }
+
+        public Game(bool withPieces)
         {
             Pieces = new List<Piece>();
             Gameboard = new int[8, 8];
@@ -24,26 +29,20 @@ namespace Model.Core
             MustCapture = false;
             MoveSet = new List<(int, int)>();
 
-            // белые — нижние 3 ряды (строки 5, 6, 7)
-            for (int row = 5; row <= 7; row++)
+            if (withPieces)
             {
-                for (int col = 0; col < 8; col++)
-                {
-                    if ((row + col) % 2 != 0)
-                        Pieces.Add(new Checker(false, (row, col)));
-                }
-            }
+                for (int row = 5; row <= 7; row++)
+                    for (int col = 0; col < 8; col++)
+                        if ((row + col) % 2 != 0)
+                            Pieces.Add(new Checker(false, (row, col)));
 
-            // чёрные — верхние 3 ряда (строки 0, 1, 2)
-            for (int row = 0; row <= 2; row++)
-            {
-                for (int col = 0; col < 8; col++)
-                {
-                    if ((row + col) % 2 != 0)
-                        Pieces.Add(new Checker(true, (row, col)));
-                }
+                for (int row = 0; row <= 2; row++)
+                    for (int col = 0; col < 8; col++)
+                        if ((row + col) % 2 != 0)
+                            Pieces.Add(new Checker(true, (row, col)));
+
+                UpdateGameBoard();
             }
-            UpdateGameBoard();
         }
 
         public void UpdateGameBoard()
@@ -81,7 +80,7 @@ namespace Model.Core
 
         private void PassMove()
         {
-            PromoteToKings(); // просто вызов метода
+            PromoteToKings();
             UpdateGameBoard();
             Deselect();
             MoveSet.Clear();
@@ -92,9 +91,11 @@ namespace Model.Core
                 if (piece.IsBlack == IsBlackTurn && piece.AvailibleCaptures(Gameboard).Count() > 1)
                     MustCapture = true;
             }
-        } // <- PassMove закрывается здесь
 
-        private void PromoteToKings() // <- отдельный метод, после PassMove
+            CheckWinCondition();
+        }
+
+        private void PromoteToKings()
         {
             for (int i = 0; i < Pieces.Count; i++)
             {
@@ -110,8 +111,6 @@ namespace Model.Core
             }
         }
 
-        public Action<(int, int)>? OnKingPromotion { get; set; }
-
         private void Deselect()
         {
             Selected = null!;
@@ -120,7 +119,7 @@ namespace Model.Core
 
         private void Capture((int, int) beginning, (int, int) end)
         {
-            Selected.MoveTo(end);
+            Selected!.MoveTo(end);
             Deselect();
             int i = (Math.Sign(end.Item1 - beginning.Item1));
             int j = (Math.Sign(end.Item2 - beginning.Item2));
@@ -128,8 +127,11 @@ namespace Model.Core
             while (deletion != end)
             {
                 Select(deletion, true);
-                Pieces.Remove(Selected);
-                Deselect();
+                if (Selected != null)
+                {
+                    Pieces.Remove(Selected);
+                    Deselect();
+                }
                 deletion.Item1 += i;
                 deletion.Item2 += j;
             }
@@ -177,7 +179,7 @@ namespace Model.Core
 
         public Game Clone()
         {
-            var clone = new Game();
+            var clone = new Game(false);
             clone.Pieces = this.Pieces.Select(p =>
             {
                 if (p is King) return (Piece)new King(p.IsBlack, p.Position);
@@ -202,6 +204,31 @@ namespace Model.Core
                     result.Add((piece.Position, to));
             }
             return result;
+        }
+
+        public bool WhiteWantsDraw { get; set; } = false;
+        public bool BlackWantsDraw { get; set; } = false;
+
+        public bool RequestDraw(bool isBlack)
+        {
+            if (isBlack)
+                BlackWantsDraw = true;
+            else
+                WhiteWantsDraw = true;
+
+            if (WhiteWantsDraw && BlackWantsDraw)
+            {
+                OnGameOver?.Invoke(null); // null = ничья
+                return true;
+            }
+            return false;
+        }
+
+        public void DeclineDraw(bool isBlack)
+        {
+            // сбрасываем оба флага при отказе
+            WhiteWantsDraw = false;
+            BlackWantsDraw = false;
         }
     }
 }
