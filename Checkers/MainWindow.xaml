@@ -5,13 +5,114 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Checkers"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Button Content="Start" Click="StartGame" Grid.Row="0" Width="200" Background="DimGray"></Button>
-    </Grid>
-    
+        Title="Шашки" Height="600" Width="800"
+        Background="#3D2010">
+	<Grid>
+		<Grid.Background>
+			<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+				<GradientStop Color="#5C3D1E" Offset="0"/>
+				<GradientStop Color="#2E1A0E" Offset="1"/>
+			</LinearGradientBrush>
+		</Grid.Background>
+
+		<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="340">
+
+			<!-- заголовок -->
+			<TextBlock Text="ШАШКИ" FontSize="48" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0 0 0 10"
+                       FontFamily="Georgia">
+				<TextBlock.Foreground>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+						<GradientStop Color="#FFD700" Offset="0"/>
+						<GradientStop Color="#B8860B" Offset="1"/>
+					</LinearGradientBrush>
+				</TextBlock.Foreground>
+			</TextBlock>
+
+			<Rectangle Height="2" Margin="20 0 20 25">
+				<Rectangle.Fill>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+						<GradientStop Color="Transparent" Offset="0"/>
+						<GradientStop Color="#FFD700" Offset="0.5"/>
+						<GradientStop Color="Transparent" Offset="1"/>
+					</LinearGradientBrush>
+				</Rectangle.Fill>
+			</Rectangle>
+
+			<!-- кнопки -->
+			<Button Content="Новая игра на двоих" Click="StartTwoPlayer"
+                    Height="50" Margin="0 6" FontSize="16" FontFamily="Georgia"
+                    Foreground="#FFD700" BorderThickness="1" BorderBrush="#8B6914"
+                    Cursor="Hand">
+				<Button.Background>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+						<GradientStop Color="#7A4A20" Offset="0"/>
+						<GradientStop Color="#4A2A0E" Offset="1"/>
+					</LinearGradientBrush>
+				</Button.Background>
+			</Button>
+
+			<Button Content="Новая игра с компьютером" Click="StartVsComputer"
+                    Height="50" Margin="0 6" FontSize="16" FontFamily="Georgia"
+                    Foreground="#FFD700" BorderThickness="1" BorderBrush="#8B6914"
+                    Cursor="Hand">
+				<Button.Background>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+						<GradientStop Color="#7A4A20" Offset="0"/>
+						<GradientStop Color="#4A2A0E" Offset="1"/>
+					</LinearGradientBrush>
+				</Button.Background>
+			</Button>
+
+			<Button Content="Продолжить игру" Click="ContinueGame"
+                    Height="50" Margin="0 6" FontSize="16" FontFamily="Georgia"
+                    Foreground="#FFD700" BorderThickness="1" BorderBrush="#8B6914"
+                    x:Name="ContinueButton" Cursor="Hand">
+				<Button.Background>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+						<GradientStop Color="#7A4A20" Offset="0"/>
+						<GradientStop Color="#4A2A0E" Offset="1"/>
+					</LinearGradientBrush>
+				</Button.Background>
+			</Button>
+
+			<Rectangle Height="1" Margin="20 20 20 15">
+				<Rectangle.Fill>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+						<GradientStop Color="Transparent" Offset="0"/>
+						<GradientStop Color="#8B6914" Offset="0.5"/>
+						<GradientStop Color="Transparent" Offset="1"/>
+					</LinearGradientBrush>
+				</Rectangle.Fill>
+			</Rectangle>
+
+			<!-- папка и формат -->
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 8">
+				<TextBlock Text="Папка: " VerticalAlignment="Center"
+                           Foreground="#C8A96E" FontFamily="Georgia"/>
+				<TextBlock x:Name="SavePathText" Text="(не выбрана)"
+                           VerticalAlignment="Center" Foreground="#FFD700"
+                           Margin="5 0" FontFamily="Georgia"/>
+				<Button Content="..." Click="SelectSaveFolder"
+                        Width="32" Height="24" Margin="5 0 0 0"
+                        Foreground="#FFD700" BorderBrush="#8B6914" Cursor="Hand">
+					<Button.Background>
+						<SolidColorBrush Color="#7A4A20"/>
+					</Button.Background>
+				</Button>
+			</StackPanel>
+
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+				<TextBlock Text="Формат: " VerticalAlignment="Center"
+                           Foreground="#C8A96E" FontFamily="Georgia"/>
+				<ComboBox x:Name="FormatComboBox" Width="90" Margin="5 0 0 0"
+          SelectionChanged="FormatChanged"
+          Background="White" Foreground="Black"
+          BorderBrush="#8B6914">
+					<ComboBoxItem Content="JSON" IsSelected="True" Foreground="Black" Background="White"/>
+					<ComboBoxItem Content="XML" Foreground="Black" Background="White"/>
+				</ComboBox>
+			</StackPanel>
+		</StackPanel>
+	</Grid>
 </Window>
