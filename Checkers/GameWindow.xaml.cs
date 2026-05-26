@@ -338,11 +338,7 @@ namespace Checkers
             }
             _gameEnded = true;
             if (File.Exists(_savePath))
-                File.Delete(_savePath);
-
-            // удаляем сохранение чтобы нельзя было продолжить
-            if (File.Exists(_savePath))
-                File.Delete(_savePath);
+                File.Delete(_savePath);   // удаляем сохранение чтобы нельзя было продолжить
         }
 
         private void GoToMenu(object sender, EventArgs e)
