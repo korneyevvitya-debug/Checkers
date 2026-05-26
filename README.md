@@ -58,6 +58,7 @@ Checkers-main/
     │   ├── Game.Win.cs        — логика победы (partial)
     │   └── GameVsComputer.cs  — игра против ИИ
     └── Data/
+        ├── IGameSerializer.cs     — интерфейс сериализатора
         ├── GameSerializerBase.cs  — абстрактный класс сериализации
         ├── GameSerializer.cs      — сериализация в JSON
         └── GameSerializerXml.cs   — сериализация в XML
@@ -72,6 +73,17 @@ Checkers-main/
 - Alpha-Beta отсечение убирает заведомо невыгодные ветки дерева
 - Оценочная функция считает количество фигур на доске
 - Соглашается на ничью если у него меньше очков (шашка = 1, дамка = 3)
+
+## Принципы ООП
+
+- **Абстракция** — `Piece`, `GameSerializerBase`
+- **Наследование** — `Checker` и `King` наследуют `Piece`, `GameVsComputer` наследует `Game`
+- **Полиморфизм** — переопределение `AvailibleMoves` и `AvailibleCaptures` в `Checker` и `King`
+- **Инкапсуляция** — приватные поля и методы во всех классах
+- **Интерфейсы** — `IMovable` для фигур, `IGameSerializer` для сериализаторов
+- **Делегаты** — `Action<>` для событий `OnGameOver`, `OnKingPromotion`
+- **Перегрузка операторов** — `==` и `!=` для `Piece`
+- **Перегрузка методов** — `Select(pos)` и `Select(pos, bool)` в `Game`
 
 ## Технологии
 
