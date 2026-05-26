@@ -30,5 +30,19 @@ namespace Model.Core
         {
             return (x >= 0 && y >= 0 && x < 8 && y < 8);
         }
+
+        public static bool operator ==(Piece? a, Piece? b)
+        {
+            if (a is null && b is null) return true;
+            if (a is null || b is null) return false;
+            return a.Position == b.Position && a.IsBlack == b.IsBlack;
+        }
+
+        public static bool operator !=(Piece? a, Piece? b) => !(a == b);
+
+        public override bool Equals(object? obj) => obj is Piece p && this == p;
+
+        public override int GetHashCode() => HashCode.Combine(Position, IsBlack);
+
     }
 }
