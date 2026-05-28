@@ -11,6 +11,7 @@ namespace Model.Core
 
         public void MakeComputerMove()
         {
+			
             // делаем один ход
             var bestMove = GetBestMove(depth: 5);
             if (bestMove == null) return;

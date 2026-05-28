@@ -12,6 +12,7 @@ namespace Model.Data
         var state = new GameState();
         state.IsBlackTurn = game.IsBlackTurn;
         state.VsComputer = game is Model.Core.GameVsComputer;
+        state.MustCapture = game.MustCapture;
 
         foreach (var piece in game.Pieces)
         {
@@ -44,6 +45,7 @@ namespace Model.Data
                 : new Model.Core.Game(false);
 
             game.IsBlackTurn = state.IsBlackTurn;
+            game.MustCapture = state.MustCapture;
 
             foreach (var p in state.Pieces)
             {
