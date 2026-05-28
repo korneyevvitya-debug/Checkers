@@ -68,21 +68,29 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
-
-			<StackPanel Grid.Row="0" Orientation="Horizontal"
+            <StackPanel Orientation="Vertical" Grid.Row="0">
+				<StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center" Margin="0 0 0 10">
-				<Button Content="← В меню" Click="GoToMenu"
+					<Button Content="← В меню" Click="GoToMenu"
                         Height="30" Width="100" Margin="0 0 10 0"
                         FontFamily="Georgia" FontSize="13"
                         Foreground="#FFD700" BorderBrush="#8B6914"
                         Background="#7A4A20" Cursor="Hand"/>
-				<TextBlock x:Name="Notification"
+					<TextBlock x:Name="MoveDisplay"
                            FontSize="18" FontFamily="Georgia"
                            Foreground="Gold" VerticalAlignment="Center"
                            Text=""/>
-			</StackPanel>
+				</StackPanel>
+                <TextBlock x:Name="Notification"
+                           FontSize="18" FontFamily="Georgia"
+                           Foreground="Gold" VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Height="30"
+                           Text=""/>
+            </StackPanel>
 
-			<Viewbox Grid.Row="1" Stretch="Uniform">
+
+            <Viewbox Grid.Row="1" Stretch="Uniform">
 				<Border BorderBrush="#8B5E3C" BorderThickness="4" CornerRadius="2">
 					<Grid Width="400" Height="400" x:Name="TestBorder">
 						<Grid x:Name="gameGrid"/>

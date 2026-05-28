@@ -80,7 +80,7 @@ namespace Model.Core
 
         private void PassMove()
         {
-            PromoteToKings();
+            
             UpdateGameBoard();
             Deselect();
             MoveSet.Clear();
@@ -97,16 +97,26 @@ namespace Model.Core
 
         private void PromoteToKings()
         {
-            for (int i = 0; i < Pieces.Count; i++)
+            //for (int i = 0; i < Pieces.Count; i++)
+            //{
+            //    var p = Pieces[i];
+            //    if (p is Checker)
+            //    {
+            //        if ((!p.IsBlack && p.Position.Item1 == 0) || (p.IsBlack && p.Position.Item1 == 7))
+            //        {
+            //            Pieces[i] = new King(p.IsBlack, p.Position);
+            //            OnKingPromotion?.Invoke(p.Position);
+            //        }
+            //    }
+            //}
+            if (Selected != null && Selected is Checker)
             {
-                var p = Pieces[i];
-                if (p is Checker)
+                if ((!Selected.IsBlack && Selected.Position.Item1 == 0) || (Selected.IsBlack && Selected.Position.Item1 == 7))
                 {
-                    if ((!p.IsBlack && p.Position.Item1 == 0) || (p.IsBlack && p.Position.Item1 == 7))
-                    {
-                        Pieces[i] = new King(p.IsBlack, p.Position);
-                        OnKingPromotion?.Invoke(p.Position);
-                    }
+                    Pieces.Add(new King(Selected.IsBlack, Selected.Position));
+                    Pieces.Remove(Selected);
+                    OnKingPromotion?.Invoke(Selected.Position);
+                    Select(Selected.Position, true);
                 }
             }
         }
@@ -120,6 +130,7 @@ namespace Model.Core
         private void Capture((int, int) beginning, (int, int) end)
         {
             Selected!.MoveTo(end);
+            PromoteToKings();
             Deselect();
             int i = (Math.Sign(end.Item1 - beginning.Item1));
             int j = (Math.Sign(end.Item2 - beginning.Item2));
@@ -172,6 +183,7 @@ namespace Model.Core
                 else
                 {
                     Selected.MoveTo(pos);
+                    PromoteToKings();
                     PassMove();
                 }
             }

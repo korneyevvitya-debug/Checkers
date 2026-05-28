@@ -10,6 +10,7 @@ namespace Model.Data
         public List<PieceState> Pieces { get; set; } = new();
         public bool IsBlackTurn { get; set; }
         public bool VsComputer { get; set; }
+        public bool MustCapture { get; set; }
     }
 
     public class PieceState
@@ -27,6 +28,7 @@ namespace Model.Data
             var state = new GameState();
             state.IsBlackTurn = game.IsBlackTurn;
             state.VsComputer = game is Model.Core.GameVsComputer;
+            state.MustCapture = game.MustCapture;
 
             foreach (var piece in game.Pieces)
             {
@@ -57,6 +59,7 @@ namespace Model.Data
                     : new Model.Core.Game(false);
 
                 game.IsBlackTurn = state.IsBlackTurn;
+                game.MustCapture = state.MustCapture;
 
                 foreach (var p in state.Pieces)
                 {
@@ -65,7 +68,7 @@ namespace Model.Data
                     else
                         game.Pieces.Add(new Model.Core.Checker(p.IsBlack, (p.Row, p.Col)));
                 }
-
+                
                 game.UpdateGameBoard();
                 return game;
             }

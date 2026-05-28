@@ -126,8 +126,9 @@ namespace Checkers
             Notification.Foreground = Brushes.Gold;
             var timer = new System.Windows.Threading.DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(3);
-            timer.Tick += (s, e) => { Notification.Text = ""; timer.Stop(); };
             timer.Start();
+            timer.Tick += (s, e) => { Notification.Text = ""; timer.Stop(); };
+            
         }
 
         private void InitGameGrid()
@@ -213,8 +214,8 @@ namespace Checkers
             UpdateCaptureCounters();
             if (!_gameEnded)
             {
-                Notification.Text = Game.IsBlackTurn ? "Ход чёрных" : "Ход белых";
-                Notification.Foreground = Brushes.Gold;
+                MoveDisplay.Text = Game.IsBlackTurn ? "Ход чёрных" : "Ход белых";
+                MoveDisplay.Foreground = Brushes.Gold;
             }
         }
 
@@ -239,9 +240,17 @@ namespace Checkers
 
             if (_vsComputer && ((Model.Core.GameVsComputer)Game).IsComputerTurn)
             {
-                ((Model.Core.GameVsComputer)Game).MakeComputerMove();
-                ShowAvailibleMoves();
-                UpdateBoard();
+                var timer = new System.Windows.Threading.DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(0.5);
+                timer.Start();
+                timer.Tick += (s, e) => 
+                {
+                    ((Model.Core.GameVsComputer)Game).MakeComputerMove();
+                    ShowAvailibleMoves();
+                    UpdateBoard();
+                    timer.Stop(); 
+                };
+                
             }
         }
 
