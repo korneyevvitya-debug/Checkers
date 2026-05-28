@@ -240,9 +240,17 @@ namespace Checkers
 
             if (_vsComputer && ((Model.Core.GameVsComputer)Game).IsComputerTurn)
             {
-                ((Model.Core.GameVsComputer)Game).MakeComputerMove();
-                ShowAvailibleMoves();
-                UpdateBoard();
+                var timer = new System.Windows.Threading.DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(0.5);
+                timer.Start();
+                timer.Tick += (s, e) => 
+                {
+                    ((Model.Core.GameVsComputer)Game).MakeComputerMove();
+                    ShowAvailibleMoves();
+                    UpdateBoard();
+                    timer.Stop(); 
+                };
+                
             }
         }
 
