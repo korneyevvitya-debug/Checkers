@@ -126,8 +126,8 @@ namespace Checkers
             Notification.Foreground = Brushes.Gold;
             var timer = new System.Windows.Threading.DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(3);
-            timer.Start();
             timer.Tick += (s, e) => { Notification.Text = ""; timer.Stop(); };
+            timer.Start();
             
         }
 
@@ -242,7 +242,6 @@ namespace Checkers
             {
                 var timer = new System.Windows.Threading.DispatcherTimer();
                 timer.Interval = TimeSpan.FromSeconds(0.5);
-                timer.Start();
                 timer.Tick += (s, e) => 
                 {
                     ((Model.Core.GameVsComputer)Game).MakeComputerMove();
@@ -250,7 +249,7 @@ namespace Checkers
                     UpdateBoard();
                     timer.Stop(); 
                 };
-                
+                timer.Start();
             }
         }
 
